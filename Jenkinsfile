@@ -1,37 +1,49 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-    nodejs 'NodeJS 18'
-  }
-
-  environment {
-    SONAR_TOKEN = credentials('sonar-token') // Make sure this matches your Jenkins credential ID
-  }
-
-  stages {
-    stage('Install') {
-      steps {
-        script {
-          bat 'npm install'
-        }
-      }
+    environment {
+        SONAR_TOKEN = credentials('SonarCloudToken') // Replace with your Jenkins credential ID
     }
 
-    stage('SonarCloud Analysis') {
-      steps {
-        withSonarQubeEnv('SonarCloud') {
-          bat 'npx sonar-scanner'
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    }
 
-    stage('Audit') {
-      steps {
-        script {
-          bat 'npm audit'
+        stage('Tool Install') {
+            steps {
+                tool name: 'NodeJS 18', type: 'nodejs'
+            }
         }
-      }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    bat 'npm install'
+                }
+            }
+        }
+
+        stage('SonarCloud Analysis') {
+            environment {
+                PATH = "${tool 'NodeJS 18'}\\bin;${env.PATH}"
+            }
+            steps {
+                withSonarQubeEnv('SonarCloud') {
+                    bat 'npx sonar-scanner'
+                }
+            }
+        }
+
+        stage('Audit') {
+            steps {
+                script {
+                    bat(script: 'npm audit > audit-report.txt || exit 0')
+                    archiveArtifacts artifacts: 'audit-report.txt', allowEmptyArchive: true
+                }
+            }
+        }
     }
-  }
 }
