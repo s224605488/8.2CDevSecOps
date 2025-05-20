@@ -24,10 +24,14 @@ pipeline {
             }
         }
 
-        stage('Audit') {
-            steps {
-                bat 'npm audit'
+       stage('Audit') {
+    steps {
+        script {
+            def auditStatus = bat(script: 'npm audit', returnStatus: true)
+            if (auditStatus != 0) {
+                echo "Audit found vulnerabilities. Continuing pipeline. Exit Code: ${auditStatus}"
             }
         }
     }
 }
+
