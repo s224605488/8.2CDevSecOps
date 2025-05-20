@@ -14,7 +14,8 @@ pipeline {
         stage('SonarCloud Analysis') {
             steps {
                 withSonarQubeEnv('SonarCloud') {
-                    bat 'npm run sonar'
+                    bat 'npx sonar-scanner'
+
                 }
             }
         }
