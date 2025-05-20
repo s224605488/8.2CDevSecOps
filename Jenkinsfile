@@ -1,38 +1,37 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        nodejs 'NodeJS 18'
-    }
+  tools {
+    nodejs 'NodeJS 18'
+  }
 
-    environment {
-        SONAR_TOKEN = credentials('sonar-token')
-    }
+  environment {
+    SONAR_TOKEN = credentials('sonar-token') // Make sure this matches your Jenkins credential ID
+  }
 
-    stages {
-        stage('Install') {
-            steps {
-                bat 'npm install'
-            }
-        }
-
-        stage('SonarCloud Analysis') {
-            steps {
-                withSonarQubeEnv('SonarCloud') {
-                    bat 'npx sonar-scanner'
-                }
-            }
-        }
-
-       stage('Audit') {
-    steps {
+  stages {
+    stage('Install') {
+      steps {
         script {
-            def auditStatus = bat(script: 'npm audit', returnStatus: true)
-            if (auditStatus != 0) {
-                echo "Audit found vulnerabilities. Continuing pipeline. Exit Code: ${auditStatus}"
-            }
+          bat 'npm install'
         }
+      }
+    }
+
+    stage('SonarCloud Analysis') {
+      steps {
+        withSonarQubeEnv('SonarCloud') {
+          bat 'npx sonar-scanner'
+        }
+      }
+    }
+
+    stage('Audit') {
+      steps {
+        script {
+          bat 'npm audit'
+        }
+      }
     }
   }
 }
-
