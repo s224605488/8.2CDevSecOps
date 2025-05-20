@@ -2,25 +2,25 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS 18'  // Must match Jenkins Tool Configuration name exactly
+        nodejs 'NodeJS 18' // Make sure this matches Jenkins NodeJS tool name
     }
 
     stages {
         stage('Install') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
         stage('SonarCloud Analysis') {
             steps {
                 withSonarQubeEnv('SonarCloud') {
-                    sh 'npm run sonar'
+                    bat 'npm run sonar'
                 }
             }
         }
         stage('Audit') {
             steps {
-                sh 'npm audit'
+                bat 'npm audit'
             }
         }
     }
